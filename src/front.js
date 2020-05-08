@@ -4,22 +4,37 @@ export default function(part) {
 
   // Design pattern here
   points.origin = new Point(0, 0);
-  points.rHem = points.origin.translate(measurements.hemLine / 7, measurements.length);
+  points.rHem = points.origin.translate(measurements.hemLine / 4 - inch / 2, measurements.length);
   points.lHem = points.origin.shift(-90, measurements.length);
-  points.rHip = points.origin.translate(measurements.frontHipArc / 2, options.naturalWaistToHip);
+  points.rHip = points.origin.translate(measurements.frontHipArc, options.naturalWaistToHip);
   points.rWaist = points.origin.translate(measurements.frontWaistArc / 2 + inch, -(3/8) * inch);
+  points.waistCp = points.rWaist.shift(195, points.origin.dx(points.rWaist) / 3);
   points.cp1 = points.rHip.shift(90, -points.rHip.dy(points.origin) / 2);
   points.cp2 = points.rHip.shift(-90, points.rHip.dy(points.rHem) / 2.5);
-  points.leftDartL = points.origin.shift(0, options.waistDartPosition);
-  points.leftDartR = points.leftDartL.shift(0, options.frontDartWidth);
-  points.leftDartC = points.leftDartL.shift(0, options.frontDartWidth / 2);
-  points.leftDartPoint = points.leftDartC.shift(-90, options.frontLeftDartLength);
-  points.rightDartL = points.leftDartR.shift(0, options.dartGap);
-  points.rightDartR = points.rightDartL.shiftTowards(points.rWaist, options.frontDartWidth);
-  points.rightDartC = points.rightDartL.shiftTowards(points.rWaist, options.frontDartWidth / 2);
-  points.rightDartPoint = points.rightDartC.shift(-90, options.frontRightDartLength);
-  points.topRight = points.origin.shift(0, measurements.frontHipArc / 2);
+  points.topRight = points.origin.shift(0, measurements.frontHipArc);
   points.bottomRight = points.topRight.shift(-90, measurements.length);
+
+  paths.waistCurve = new Path()
+    .move(points.origin)
+    ._curve(points.waistCp, points.rWaist)
+
+  // Dart points
+  points.leftDartC = paths.waistCurve
+    .shiftAlong(options.waistDartPosition);
+  points.leftDartR = paths.waistCurve
+    .shiftAlong(options.waistDartPosition + options.frontDartWidth/2);
+  points.leftDartL = paths.waistCurve
+    .shiftAlong(options.waistDartPosition - options.frontDartWidth/2);
+  points.leftDartPoint = points.leftDartC
+    .shift(-90, options.frontLeftDartLength);
+  points.rightDartL = paths.waistCurve
+    .shiftAlong(options.waistDartPosition + options.frontDartWidth/2 + options.dartGap);
+  points.rightDartR = paths.waistCurve
+    .shiftAlong(options.waistDartPosition + options.frontDartWidth/2 + options.dartGap + options.frontDartWidth);
+  points.rightDartC = paths.waistCurve
+    .shiftAlong(options.waistDartPosition + options.frontDartWidth/2 + options.dartGap + options.frontDartWidth/2);
+  points.rightDartPoint = points.rightDartC
+    .shift(-87, options.frontRightDartLength);
 
   paths.rectangle = new Path()
     .move(points.origin)
@@ -30,20 +45,22 @@ export default function(part) {
     .close()
     .attr("class", "various dashed");
   
-  paths.front = new Path()
+  paths.seam = new Path()
     .move(points.origin)
     .line(points.lHem)
     .line(points.rHem)
     ._curve(points.cp2, points.rHip)
     ._curve(points.cp1, points.rWaist)
-    .line(points.rightDartR)
-    .line(points.rightDartPoint)
-    .line(points.rightDartL)
-    .line(points.leftDartR)
+    
+  paths.leftDart = new Path()
+    .move(points.leftDartL)
     .line(points.leftDartPoint)
-    .line(points.leftDartL)
-    .line(points.origin)
-    .close(); 
+    .line(points.leftDartR)
+
+  paths.rightDart = new Path()
+    .move(points.rightDartL)
+    .line(points.rightDartPoint)
+    .line(points.rightDartR)
 
   // Complete?
   if (complete) {
