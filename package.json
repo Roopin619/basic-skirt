@@ -44,7 +44,7 @@
     "cross-env": "^5.1.4",
     "react-scripts": "^3.0.1",
     "webpack": "4.29.6",
-    "rollup": "^0.64.1",
+    "rollup": "^2.79.2",
     "rollup-plugin-babel": "^4.0.1",
     "rollup-plugin-babel-minify": "^7.0.0",
     "rollup-plugin-commonjs": "^9.1.3",
